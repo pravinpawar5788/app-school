@@ -1,0 +1,40 @@
+@media print{
+    .noprint{display: none;}
+    @page{
+/*        size: auto;    auto is the initial value 
+        margin: 0mm;   this affects the margin in the printer settings */
+    }
+}
+
+.brand-name{
+    color:#fff;
+    font-size: 14px;
+    font-weight: bolder;
+}
+.brand-version{
+    color:#fff;
+    font-size: 8px;
+    font-weight: bolder;
+    margin: 4px;
+}
+.sms_text{
+    font-size: 10pt;
+}
+.img-profile{
+    width: 175px;
+    height: 175px;
+}
+.img-list{
+    width: 60px;
+    height: 60px;
+}
+.img-class{
+    width: 45px;
+    height: 45px;
+}
+.mouse-pointer{
+    cursor: pointer;
+}
+.table td, .table th{
+    padding: .6rem 0.9rem;
+}

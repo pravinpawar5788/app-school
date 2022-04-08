@@ -1,0 +1,19 @@
+@media print{
+    .noprint{display: none;}
+    @page{
+/*        size: auto;    auto is the initial value 
+        margin: 0mm;   this affects the margin in the printer settings */
+    }
+}
+
+.brand-name{
+color:#fff;
+font-size: 14px;
+font-weight: bolder;
+}
+.brand-version{
+    color:#fff;
+    font-size: 9px;
+    font-weight: bolder;
+    margin: 4px;
+}

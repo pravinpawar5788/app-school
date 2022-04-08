@@ -1,0 +1,29 @@
+RewriteEngine on
+######RewriteCond $1 !^(index\.php|images|robots\.txt)
+######RewriteRule ^(.*)$ /index.php/$1 [L]
+
+
+Options +FollowSymLinks
+Options -Indexes
+DirectoryIndex index.php
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|assets|images|css|js|robots\.txt|favicon\.ico)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+RewriteRule ^(.*)$ index.php?/$1 [L,QSA] 
+
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+
+	#	If you are having problems with the rewrite rules, remove the "#" from the
+	#	line that begins "RewriteBase" below. You will also have to change the path
+	#	of the rewrite to reflect the path to your base path.
+	#RewriteBase /
+
+
+RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$
+RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
+RewriteRule  ^/?ajax/(.*)$	ajax.php?$1 [NC,QSA,L]
+</IfModule>

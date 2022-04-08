@@ -1,0 +1,116 @@
+<?php
+
+
+class Lib_book_M extends MY_Model
+{
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// INHERITED PROPERTIES //////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+    protected $_model_name='Lib_book_M.php';
+	protected $_table_name = 'lib_books';
+    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// PUBLIC PROPERTIES /////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+        public $DB_COL_ARRAY=array();
+
+        public $CAT_GENERAL='general'; 
+        public $CAT_ISLAMIC='islamic'; 
+        public $CAT_RELIGION='religion'; 
+        public $CAT_SCIENCE='science'; 
+        public $CAT_IT='it'; 
+        public $CAT_GENERALWORKS='generalworks'; 
+        public $CAT_PHILOSOPHY='philosophy'; 
+        public $CAT_SOCIALSCIENCES='socialsciences'; 
+        public $CAT_ARTS='arts'; 
+        public $CAT_LITERATURE='literature'; 
+        public $CAT_HISTORY='history'; 
+        public $CAT_GEOGRAPHY='geography'; 
+        public $CAT_LAW='law'; 
+        public $CAT_BIOGRAPHY='biography'; 
+        public $CAT_POETRY='poetry'; 
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// PUBLIC FUNCTIONS /////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+
+	function __construct (){
+		parent::__construct();
+	}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////// SETTER FUNCTIONS //////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Initialize some Componenets on new row addition (optional)
+public function init_tasks($data){
+//init other models
+return true;   
+  
+}
+//ADD NEW TABLE ROW IN DATABASE 
+public function add_row($vals){
+    //GET ALL THE FIELDS IN ARRAY  
+	
+    $db_row=  $this->grab_row($vals);        
+    //PERFROM DIFFERENCT CHECKS BEFORE DATA INSERTION (OPTIONAL)
+    ////////////////////////////////////////////////////////////////////////
+    $db_row['date']=$this->date;
+    $db_row['jd']=$this->todayjd;
+    
+    //SAVE DATA INTO DATABASE
+    return $this->save_db_row($db_row);
+}
+//VALIDATE DATA BEFORE SAVING NEW RECORD
+public function is_valid_data($data){
+    if(empty($data['campus_id'])||empty($data['catagory'])||empty($data['name'])){
+        return false;
+    }  
+    
+    
+    ///////////// data is valid to insert or update
+    return true;
+    
+}	  
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////// GETTER FUNCTIONS ////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+public function get_book_cats(){
+    $types=array();
+
+    $types[$this->CAT_GENERAL]='General Book';
+    $types[$this->CAT_ISLAMIC]='Islamic';
+    $types[$this->CAT_RELIGION]='Religion';
+    $types[$this->CAT_SCIENCE]='Science';
+    $types[$this->CAT_IT]='Computer and IT';
+    $types[$this->CAT_GENERALWORKS]='General Works';
+    $types[$this->CAT_PHILOSOPHY]='Philosophy';
+    $types[$this->CAT_SOCIALSCIENCES]='Social Sciences';
+    $types[$this->CAT_ARTS]='Art and Recreation';
+    $types[$this->CAT_LITERATURE]='Literature';
+    $types[$this->CAT_HISTORY]='History';
+    $types[$this->CAT_GEOGRAPHY]='Geography';
+    $types[$this->CAT_LAW]='Law';
+    $types[$this->CAT_BIOGRAPHY]='Biography';
+    $types[$this->CAT_POETRY]='Poetry';
+
+    return $types;
+}
+
+
+
+
+
+//////////////////////////////////////////////// END OF CLASS /////////////////////
+}

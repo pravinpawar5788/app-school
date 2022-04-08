@@ -1,0 +1,1708 @@
+<?php
+$sections=$this->class_section_m->get_rows(array('campus_id'=>$this->CAMPUSID),array('orderby'=>'name ASC') );
+$classes=$this->class_m->get_rows(array('campus_id'=>$this->CAMPUSID),array('orderby'=>'display_order ASC') );
+$sessions=$this->session_m->get_rows(array(),array('orderby'=>'status ASC,mid DESC') );
+$std_groups=$this->std_group_m->get_rows(array());
+
+?>
+<!-- Main content -->
+<div class="content-wrapper" ng-controller="mozzCtrl"  ng-cloak>
+
+<!-- Page header -->
+<div class="page-header page-header-light">
+	<div class="page-header-content header-elements-md-inline">
+		<div class="page-title d-flex">
+			<h4><i class="icon-arrow-left52 mr-2"></i> <span class="font-weight-semibold">Students</span> - Student List</h4>
+			<a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a><br>			
+		</div>
+
+		<div class="header-elements d-none">
+			<!-- <div class="d-flex justify-content-center">
+				<a href="#" class="btn btn-link btn-float text-default"><i class="icon-bars-alt text-primary"></i><span>Statistics</span></a>
+				<a href="#" class="btn btn-link btn-float text-default"><i class="icon-calculator text-primary"></i> <span>Invoices</span></a>
+				<a href="#" class="btn btn-link btn-float text-default"><i class="icon-calendar5 text-primary"></i> <span>Schedule</span></a>
+			</div> -->
+		</div>
+		<div class="d-flex">
+			<div class="breadcrumb">
+				<a href="<?php print $this->LIB_CONT_ROOT;?>" class="breadcrumb-item"><i class="icon-home2 mr-2"></i> Home</a>
+				<span class="breadcrumb-item active">Student List</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="breadcrumb-line breadcrumb-line-light header-elements-md-inline">
+		<div class="d-flex">
+			<div class="breadcrumb justify-content-center">				
+				<a href="<?php print $this->LIB_CONT_ROOT;?>student" class="breadcrumb-elements-item" style="color:<?php $clr=get_random_hax_color('dark'); print $clr;?>;"><i class="icon-users2 mr-2" style="color:<?php print $clr;?>;"></i> Students</a>
+				<?php if($this->LOGIN_USER->prm_std_info>1){?>
+				<a href="" class="breadcrumb-elements-item" data-target="#add" <?php print $this->MODAL_OPTIONS;?> style="color:<?php $clr=get_random_hax_color('dark'); print $clr;?>;">
+					<i class="icon-user-plus mr-2" style="color:<?php print $clr;?>;"></i> Add New Student</a>
+				<a href="" class="breadcrumb-elements-item" data-target="#add-bulk" <?php print $this->MODAL_OPTIONS;?> style="color:<?php $clr=get_random_hax_color('dark'); print $clr;?>;">
+					<i class="icon-user-plus mr-2" style="color:<?php print $clr;?>;"></i> Add Bulk Students</a>
+				<a <?php print $this->MODAL_OPTIONS;?> data-target="#list-sms" class="breadcrumb-elements-item mouse-pointer" style="color:<?php $clr=get_random_hax_color('dark'); print $clr;?>;">
+					<i class="icon-envelope mr-2" style="color:<?php print $clr;?>;"></i> Send SMS Notification</a>
+				<?php } ?>
+			</div>
+
+			<a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-more"></i></a>
+		</div>
+
+		<div class="header-elements d-none">
+			<div class="breadcrumb justify-content-center">
+
+				<div class="breadcrumb-elements-item dropdown p-0">
+					<a href="#" class="breadcrumb-elements-item dropdown-toggle" data-toggle="dropdown">
+						<i class="icon-printer mr-2"></i>Print
+					</a>
+					<div class="dropdown-menu dropdown-menu-left">
+						
+						<div class="dropdown-submenu dropdown-submenu-left">
+							<a href="#" class="dropdown-item"><i class="icon-clipboard4"></i> Forms</a>
+							<div class="dropdown-menu">
+								<!-- <div class="dropdown-submenu dropdown-submenu-left">
+									<a href="#" class="dropdown-item">Student Cards</a>
+									<div class="dropdown-menu">
+										<a href="#" class="dropdown-item">Identity Cards</a>
+										<a href="#" class="dropdown-item">Transport Cards</a>
+									</div>
+								</div> -->
+								<a href="<?php print $this->CONT_ROOT.'printing/form/?type=stdreg';?>" class="dropdown-item">Student Admission Form</a>
+								<!-- <a href="<?php print $this->CONT_ROOT.'printing/list/?alumni';?>" class="dropdown-item">Fee Defaulter Notice</a> -->
+							</div>
+						</div>
+						<div class="dropdown-submenu dropdown-submenu-left">
+							<a href="#" class="dropdown-item"><i class="icon-clipboard6"></i> Reports</a>
+							<div class="dropdown-menu">
+								<!-- <div class="dropdown-submenu dropdown-submenu-left">
+									<a href="#" class="dropdown-item">Payments Reports</a>
+									<div class="dropdown-menu">
+										<a href="#" class="dropdown-item">Upaid Students</a>
+										<a href="#" class="dropdown-item">Partialy Paid Students</a>
+										<a href="#" class="dropdown-item">Paid Students</a>
+									</div>
+								</div> -->
+								<a href="<?php print $this->CONT_ROOT.'printing/report/?rpt=mrgconcession';?>" class="dropdown-item">Concession Marginal Report</a>
+							</div>
+						</div>
+						<div class="dropdown-divider"></div>
+						<?php $defprt_prm='&p_computer&p_stdid&p_fname';?>
+						<a href="<?php print $this->CONT_ROOT.'printing/list/?'.$defprt_prm;?>" class="dropdown-item"><i class="icon-users"></i> All Students List</a>
+						<a href="<?php print $this->CONT_ROOT.'printing/list/?status=active'.$defprt_prm;?>" class="dropdown-item"><i class="icon-user-check"></i> Active Students List</a>
+						<a href="<?php print $this->CONT_ROOT.'printing/list/?nstatus=active'.$defprt_prm;?>" class="dropdown-item"><i class="icon-user-block"></i> Not Active Students</a>
+						<a href="<?php print $this->CONT_ROOT.'printing/list/?alumni'.$defprt_prm;?>" class="dropdown-item"><i class="icon-graduation2"></i> Alumni Students List</a>
+						<!-- <a href="<?php print $this->CONT_ROOT.'printing/card/';?>" class="dropdown-item"><i class="icon-vcard"></i> Student Cards</a> -->
+					</div>
+				</div>
+				<!-- on each page -->
+				<a href="<?php print $this->APP_ROOT.'docs/student';?>" target="_blank" class="breadcrumb-elements-item">
+					<i class="icon-lifebuoy mr-2"></i>Docs
+				</a>
+				<a class="breadcrumb-elements-item mouse-pointer" data-popup="popover" data-trigger="hover" data-html="true" data-placement="left" title="View Hotkeys" data-content="You can press <code>?</code> button to view the hotkeys for this module. Remember to press <code>shift</code> key while pressing <code>?</code>key.">
+					<i class="icon-help mr-2"></i>Hotkeys
+				</a>
+				<!-- end on each page -->
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /page header -->
+
+
+<!-- Content area -->
+<div class="content">
+
+
+	<?php $this->load->view($this->LIB_VIEW_DIR.'includes/alert_inc');?>
+	<!-- Search field -->
+	<div class="card search-area" >
+		<div class="card-body">
+			<h5 class="mb-3">Search Student</h5>
+			<div class="row">
+				<div class="col-sm-3">
+					<select class="form-control select" ng-model="filter.filter" data-fouc>
+						<option value="">Via General Data</option>
+						<option value="computer_number">Via Computer Number</option>
+						<option value="family_number">Via Family Number</option>
+						<option value="admission_no">Via Admission Number</option>
+						<option value="student_id">Via Student ID</option>
+						<option value="name">Via Name</option>
+						<option value="father_name">Via Father Name</option>
+						<option value="nic">Via NIC / Form-B</option>
+						<option value="mobile">Via Mobile</option>
+						<option value="guardian_mobile">Via Guardian Mobile</option>
+
+					</select>
+				</div>
+				<div class="col-sm-6">
+					<div class="input-group mb-3">
+						<div class="form-group-feedback form-group-feedback-left">
+							<input type="text" class="form-control form-control-md alpha-grey" ng-model="searchText" placeholder="Search" ng-keyup="loadRows()">
+							<div class="form-control-feedback form-control-feedback-md">
+								<i class="icon-search4 text-muted"></i>
+							</div>
+						</div>
+
+						<div class="input-group-append">
+							<button ng-click="loadRows()" class="btn btn-success btn-lg">
+							<span class="font-weight-bold"> Search</span>
+							<i ng-class="{'icon-spinner2':appConfig.btnClickedSearch, 'spinner':appConfig.btnClickedSearch, 'icon-circle-right2':!appConfig.btnClickedSearch}" class=" ml-2"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-3">
+					<a class="btn btn-info btn-lg text-white" <?php print $this->MODAL_OPTIONS;?> data-target="#refine-search">
+							<i class="icon-filter3"></i> Advance Search</a>
+					<a class="btn btn-danger text-white" ng-show="showFilter()" ng-click="clearFilter();loadRows();">
+							<i class="icon-diff-removed"></i></a>
+					<div class="list-icons m-2" ng-show="showFilter()" >
+						<div class="list-icons-item dropdown">
+							<a href="#" class="list-icons-item dropdown-toggle caret-0" data-toggle="dropdown">
+								<i class="icon-menu9 mr-5"></i></a>
+							<div class="dropdown-menu dropdown-menu-right">
+								<a class="dropdown-item" ng-href="<?php print $this->CONT_ROOT.'printing/list/?'?>{{filterGetString()}}">
+									<i class="icon-printer mr-2"></i> Print Search Data 
+								</a>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /search field -->
+
+	<!-- List table -->
+	<div class="card">
+		<div class="card-header bg-transparent">
+			<h4 class="card-title">Students List </h4>
+			<span class="text-muted">Students list of the session.</span>
+		</div>
+		<div class="table-responsive">
+		<table class="table tasks-responsive table-lg">
+			<thead>
+				<tr>
+					<th class="font-weight-bold">#</th>
+					<th ng-click="sortBy('name');" class="mouse-pointer font-weight-bold" >
+						<span class="m-1">Name</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='name'"></i> 
+					</th>
+					<th ng-click="sortBy('father_name');" class="mouse-pointer font-weight-bold" >
+						<span class="m-1">Father Name</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='father_name'"></i> 
+					</th>
+					<th ng-click="sortBy('class_id');" class="mouse-pointer font-weight-bold">
+						<span class="m-1">Class</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='class_id'"></i> 
+					</th>
+					<?php if(count($sections)>0){ ?>
+					<th ng-click="sortBy('section_id');" class="mouse-pointer font-weight-bold">
+						<span class="m-1">Section</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='section_id'"></i> 
+					</th>
+					<?php } ?>
+					<th ng-click="sortBy('computer_number');" class="mouse-pointer font-weight-bold">
+						<span class="m-1">Comp. N0</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='computer_number'"></i> 
+					</th>
+					<th ng-click="sortBy('fee');" class="mouse-pointer font-weight-bold">
+						<span class="m-1">Fee</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='fee'"></i> 
+					</th>
+					<th ng-click="sortBy('status');" class="mouse-pointer font-weight-bold">
+						<span class="m-1">Status</span><i <?php print $this->SORT_ICON;?> ng-show="sortKey==='status'"></i> 
+					</th>
+					<th class="text-center text-muted" style="width: 30px;"><i class="icon-checkmark3"></i></th>
+	            </tr>
+			</thead>
+			<tbody>
+
+				<tr ng-repeat="row in responseData.rows">
+					<td>{{$index+1+(appConfig.currentPage*appConfig.pageLimit)}}</td>
+	                <td>
+	                	<div><a ng-href="<?php print $this->CONT_ROOT.'profile/'?>{{row.mid}}" class="font-weight-semibold">
+						<img ng-src="<?php print $this->UPLOADS_ROOT;?>images/student/profile/{{row.image}}" class="rounded-circle m-1" width="32" height="32" alt="">
+                		{{row.name}}
+						</a></div>
+					</td> 
+					<td>{{row.father_name}}</td>
+  					<td>{{row.class}}</td>  
+					<?php if(count($sections)>0){ ?> 
+  					<td>{{row.section}}</td>  
+  					<?php } ?> 
+  					<td>{{row.computer_number}}</td>   
+  					<td><?php print $this->SETTINGS[$this->system_setting_m->_CURRENCY_SYMBOL]?>{{row.fee}}</td>  
+	                <td>
+                	<div class="btn-group">
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_ALUMNI;?>'" class="badge bg-success dropdown-toggle mouse-pointer" data-toggle="dropdown">
+							<?php print strtoupper($this->student_m->STATUS_ALUMNI);?></a>
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_ACTIVE;?>'" class="badge bg-success dropdown-toggle mouse-pointer" data-toggle="dropdown">
+							<?php print strtoupper($this->student_m->STATUS_ACTIVE);?></a>
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_UNACTIVE;?>'" class="badge bg-danger dropdown-toggle mouse-pointer" data-toggle="dropdown">
+							<?php print strtoupper($this->student_m->STATUS_UNACTIVE);?></a>
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_EXPELLED;?>'" class="badge bg-warning dropdown-toggle mouse-pointer" data-toggle="dropdown">
+							<?php print strtoupper($this->student_m->STATUS_EXPELLED);?></a>
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_TRANSFER;?>'" class="badge bg-info dropdown-toggle mouse-pointer" data-toggle="dropdown"><?php print strtoupper($this->student_m->STATUS_TRANSFER);?></a>
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_PASSOUT;?>'" class="badge bg-primary dropdown-toggle mouse-pointer" data-toggle="dropdown">
+							<?php print strtoupper($this->student_m->STATUS_PASSOUT);?></a>
+						<a ng-show="row.status==='<?php print $this->student_m->STATUS_LEFT;?>'" class="badge bg-pink dropdown-toggle mouse-pointer" data-toggle="dropdown">
+							<?php print strtoupper($this->student_m->STATUS_LEFT);?></a>
+						
+						<?php if($this->LOGIN_USER->prm_std_info>1){?>
+						<div class="dropdown-menu dropdown-menu-right">
+							<a class="dropdown-item mouse-pointer" ng-show="row.status!=='<?php print $this->student_m->STATUS_ACTIVE;?>'" ng-click="changeStatus(row, '<?php print $this->student_m->STATUS_ACTIVE;?>');"><span class="badge badge-mark mr-2 bg-success border-success"></span> Activate</a>
+							<a class="dropdown-item mouse-pointer" ng-show="row.status!=='<?php print $this->student_m->STATUS_UNACTIVE;?>'" ng-click="changeStatus(row, '<?php print $this->student_m->STATUS_UNACTIVE;?>');"><span class="badge badge-mark mr-2 bg-danger border-danger"></span> Disable</a>
+							<a class="dropdown-item mouse-pointer" ng-show="row.status!=='<?php print $this->student_m->STATUS_EXPELLED;?>'" ng-click="changeStatus(row, '<?php print $this->student_m->STATUS_EXPELLED;?>');"><span class="badge badge-mark mr-2 bg-warning border-warning"></span> Expel Student</a>
+							<?php if($this->campus_m->get_rows(array(),'',true)>1){ ?>
+								<a class="dropdown-item mouse-pointer" ng-show="row.status!=='<?php print $this->student_m->STATUS_TRANSFER;?>'" ng-click="changeStatus(row, '<?php print $this->student_m->STATUS_TRANSFER;?>');"><span class="badge badge-mark mr-2 bg-info border-info"></span> Campus Changed</a>
+							<?php } ?>
+							<!-- <a class="dropdown-item mouse-pointer" ng-show="row.status!=='<?php print $this->student_m->STATUS_PASSOUT;?>'" ng-click="changeStatus(row, '<?php print $this->student_m->STATUS_PASSOUT;?>');"><span class="badge badge-mark mr-2 bg-primary border-primary"></span> Passed Out</a> -->
+							<a class="dropdown-item mouse-pointer" ng-show="row.status!=='<?php print $this->student_m->STATUS_LEFT;?>'" ng-click="changeStatus(row, '<?php print $this->student_m->STATUS_LEFT;?>');"><span class="badge badge-mark mr-2 bg-pink border-pink"></span> Mark Left</a>
+
+						</div>
+						<?php } ?>
+					</div>
+
+
+                	</td>
+					<td>
+						<div class="list-icons float-right">
+							<div class="btn-group list-icons-item dropdown">
+		                    	<button type="button" class="btn btn-sm btn-info btn-labeled btn-labeled-right dropdown-toggle" data-toggle="dropdown"><b><i class="icon-menu7"></i></b> Options</button>
+								
+								<div class="dropdown-menu dropdown-menu-right">
+									<a ng-href="<?php print $this->CONT_ROOT.'profile/';?>{{row.mid}}" class="dropdown-item"><i class="icon-user"></i> Profile</a>
+									
+									<?php if($this->LOGIN_USER->prm_std_info>1){?>
+										<a <?php print $this->MODAL_OPTIONS;?> data-target="#edit" class="dropdown-item" ng-click="selectRow(row)">
+										<i class="icon-compose"></i> Update Account
+									</a>
+									<?php } ?>
+									<a <?php print $this->MODAL_OPTIONS;?> data-target="#sms" class="dropdown-item" ng-click="selectRow(row)">
+										<i class="icon-envelop"></i> Send SMS Notification
+									</a>
+									<!-- <a ng-href="<?php print $this->CONT_ROOT.'printing/profile/?usr='?>{{row.mid}}" class="dropdown-item">
+										<i class="icon-printer"></i> Print Profile
+									</a> -->
+									<?php if($this->LOGIN_USER->prm_std_info>1){?>
+									<a <?php print $this->MODAL_OPTIONS;?> data-target="#fee" class="dropdown-item" ng-click="selectRow(row)">
+										<i class="icon-coin-dollar"></i> Create Fee Voucher
+									</a>
+									<div class="dropdown-divider"></div>
+									<a <?php print $this->MODAL_OPTIONS;?> data-target="#password" class="dropdown-item" ng-click="selectRow(row)">
+										<i class="icon-user-lock"></i> Change Portal Password
+									</a>
+									<?php } ?>
+									<?php if($this->LOGIN_USER->prm_std_info>2){?>
+									<a class="dropdown-item" ng-click="delRow(row)"><i class="icon-user-cancel"></i> Delete Account</a>
+									<?php }?>
+								</div>
+							</li>
+						</div>
+					</td>
+	            </tr>
+
+
+			</tbody>
+		</table>
+		<br><br><br>
+
+		<div>
+		<button ng-show="appConfig.showBtnBack===true" class="btn btn-success m-3 font-weight-bold " ng-click="moveBack();loadRows()">
+		<i class="icon-arrow-left52"></i> Back Page</button>
+		<button ng-show="appConfig.showBtnNext===true" class="btn btn-success m-3 float-right " ng-click="moveNext();loadRows()">
+		 Next Page <i class="icon-arrow-right6"></i></button>
+		<br><br><br>
+		</div>
+		</div>
+	</div>
+	<!-- /list table -->
+
+</div>
+<!-- /content area -->
+
+
+<!-- Footer -->
+<?php
+$this->load->view($LIB_VIEW_DIR.'includes/footer_inc');
+?>
+<!-- /footer -->
+
+
+<!-- ********************************************************************** -->
+<!-- ///////////////////////////////MODALS///////////////////////////////// -->
+<!-- ********************************************************************** -->
+
+<!-- refine search modal -->
+<div id="refine-search" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-full">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Refine Your Search</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you search specific data by applying various filters on search. Please choose the filters you want to apply in your next search. After filter selection click the search button...</p>
+
+				<hr>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-sm-2">
+							<label class="text-muted">Session</label>
+							<select class="form-control select" ng-model="filter.session" data-fouc>
+							<option value="">Select Session</option>
+							<?php foreach ($sessions as $row){?>            
+							    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+						    <?php }?>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Class</label>
+							<select class="form-control select" ng-model="filter.class" data-fouc>
+							<option value="">Select Class</option>
+							<?php foreach ($classes as $row){?>            
+							    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+						    <?php }?>          
+							    <option value="alumni" />Alumni Students
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Status</label>
+							<select class="form-control select" ng-model="filter.status" data-fouc>
+							<option value="">Select Status</option>
+							<option value="<?php print $this->student_m->STATUS_ACTIVE;?>" /><?php print strtoupper($this->student_m->STATUS_ACTIVE);?>
+							<option value="<?php print $this->student_m->STATUS_UNACTIVE;?>" /><?php print strtoupper($this->student_m->STATUS_UNACTIVE);?>
+							<option value="<?php print $this->student_m->STATUS_EXPELLED;?>" /><?php print strtoupper($this->student_m->STATUS_EXPELLED);?>
+							<option value="<?php print $this->student_m->STATUS_LEFT;?>" /><?php print strtoupper($this->student_m->STATUS_LEFT);?>
+							<option value="<?php print $this->student_m->STATUS_TRANSFER;?>" /><?php print strtoupper($this->student_m->STATUS_TRANSFER);?>
+							<option value="<?php print $this->student_m->STATUS_ALUMNI;?>" /><?php print strtoupper($this->student_m->STATUS_ALUMNI);?>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Fee Type</label>
+							<select class="form-control select" ng-model="filter.fee" data-fouc>
+								<option value="">Select Fee Type</option>
+								<option value="<?php print $this->std_fee_voucher_m->TYPE_MONTHLY;?>">Monthly Fee</option>
+								<option value="<?php print $this->std_fee_voucher_m->TYPE_FIXED;?>">Fixed Fee</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Gender</label>
+							<select class="form-control select" ng-model="filter.gender" data-fouc>
+							<option value="">Select Gender</option>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+							<option value="other">Other</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Blood Group</label>
+							<select class="form-control select" ng-model="filter.blood_group" data-fouc>
+							<option value="">Selec Boold Group</option>
+							<option value="A+">A+</option>
+							<option value="A-">A-</option>
+							<option value="B+">B+</option>
+							<option value="B-">B-</option>
+							<option value="O+">O+</option>
+							<option value="O-">O-</option>
+							<option value="AB+">AB+</option>
+							<option value="AB-">AB-</option>
+							</select>
+						</div>
+
+						
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="loadRows()" class="btn btn-success btn-lg" data-dismiss="modal">
+						<span class="font-weight-bold"> Search</span>
+						<i class="icon-circle-right2 ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /refine search modal -->
+
+
+<!-- add modal -->
+<div id="add-bulk" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-full">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Add Bulk Students</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you register multiple students in one go. Please provide required data to register student accounts. Ask your administrator to create a new classes for you if target class is not available in drop down option...</p>
+				
+				<?php echo form_open_multipart($this->CONT_ROOT.'addfromfile');?> 
+				<!-- <input type="hidden" name="list" value="{{selectedRow.id}}" /> -->
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">General Data</h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+
+					<div class="card-body <?php print $card_bg;?>">
+						<div class="form-group">
+							<div class="row">
+
+								<div class="col-sm-3">
+									<label class="text-muted">Fee Collection</label>
+									<select class="form-control select" name="fee_type" data-fouc>
+									<option value="monthly">Monthly Collection</option>
+									<option value="fixed">Session Wise Collection</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Admission Session<span class="text-danger"> * </span></label>
+									<select class="form-control select" name="session_id" data-fouc>
+									<option value="">Select Session</option>
+									<?php foreach ($sessions as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php if($this->IS_COLLEGE){?>
+								<div class="col-sm-3">
+									<label class="text-muted">Select Group</label>
+									<select class="form-control select" name="group_id" data-fouc>
+									<option value="">Select Group</option>
+									<option value="0">Select Group</option>
+									<?php foreach ($std_groups as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php } ?>
+								<div class="col-sm-3">
+									<label class="text-muted">Select Class<span class="text-danger"> * </span></label>
+									<select class="form-control select" name="class_id" ng-model="student.class_id" ng-change="loadClassSections()" data-fouc>
+									<option value="">Select Class</option>
+									<?php foreach ($classes as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Select Section</label>
+									<select class="form-control select" name="section_id" data-fouc>
+									<option value="">Select Section</option>
+									<option ng-repeat="row in classSections" value="{{row.mid}}">{{row.name}}</option>
+									</select>
+								</div>
+								
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="form-group">
+					<div class="row">
+						<div class="col-sm-12">
+						<span>For bulk student registration download <a href="<?php print $this->APP_ROOT.'assets/download/bulk-student-sample.xls' ?>">Sample Excel File</a>.</span><br><br><br>
+						</div>
+						<div class="col-sm-12">		
+						<input id="clientImageFile" type="file" name="file" style="display: none;" onchange="showname()">
+						<input type="button" value="Browse Excel File" class="btn btn-default btn-lg" onclick="document.getElementById('clientImageFile').click();" />
+
+						<button class="btn btn-success btn-lg" ng-show="file!==''" style="margin-left: 50px;">
+						  <i class="icon-upload position-right"></i><strong> Upload &amp; Save</strong></button>   
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<!-- <button ng-click="saveRow()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Save</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button> -->
+
+				<?php echo form_close(); ?>
+				<!-- <br> -->
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /add modal -->
+
+<!-- add modal -->
+<div id="add" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-full">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Create New Account</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you admit new student here. Please provide required data to register a new account. Ask your administrator to create a new classes for you if target class is not available in drop down option...</p>
+				
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">Required Data</h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+
+						<div class="card-body <?php print $card_bg;?>">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-4">
+									<label class="text-muted">Computer Number <span class="text-danger"> * </span><span class="text-white ml-2">(Last Computer: <strong>{{responseData.last_computer_number}}</strong>)</span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Computer Number" ng-model="student.computer_number">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-laptop"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-4">
+									<label class="text-muted">Family Number <span class="text-danger"> * </span><span class="text-white ml-2">(Last Family: <strong>{{responseData.last_family_number}}</strong>)</span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Family Number" ng-model="student.family_number">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-people"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-4">
+									<label class="text-muted">Admission Number <span class="text-danger"> * </span><span class="text-white ml-2">(Last admission: <strong>{{responseData.last_admission_number}}</strong>)</span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Admission Number" ng-model="student.admission_number">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-3">
+									<label class="text-muted">Student Name <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Full Name" ng-model="student.name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Father Name </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Father Name" ng-model="student.father_name" ng-blur="student.guardian_name=student.father_name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Guardian Name <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Guardian Name" ng-model="student.guardian_name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Guardian Mobile <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="03xxxxxxxxx" ng-model="student.guardian_mobile" ng-blur="student.mobile=student.guardian_mobile">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-mobile"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+								<div class="col-sm-3">
+									<label class="text-muted">Admission Session<span class="text-danger"> * </span></label>
+									<select class="form-control select" ng-model="student.session_id" data-fouc>
+									<option value="">Select Session</option>
+									<?php foreach ($sessions as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php if(count($std_groups)>0 && $this->IS_COLLEGE){?>
+								<div class="col-sm-2">
+									<label class="text-muted">Group<span class="text-danger"> * </span></label>
+									<select class="form-control select" ng-model="student.group_id" data-fouc>
+									<option value="">Select Group</option>
+									<?php foreach ($std_groups as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php } ?>
+								<div class="col-sm-3">
+									<label class="text-muted">Admission Class<span class="text-danger"> * </span></label>
+									<select class="form-control select" ng-model="student.class_id" ng-change="loadClassSections();loadClassFee();" data-fouc>
+									<option value="">Select Class</option>
+									<?php foreach ($classes as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<div class="col-sm-2" ng-show="classSections.length>0">
+									<label class="text-muted">Section</label>
+									<select class="form-control select" ng-model="student.section_id" data-fouc>
+									<option value="">Select Section</option>
+									<option ng-repeat="row in classSections" value="{{row.mid}}">{{row.name}}</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<label class="text-muted">Roll Number </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Class Roll Number" ng-model="student.roll_no">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">								
+								<div class="col-sm-3">
+									<?php if(!$this->IS_COLLEGE){ ?>
+									<label class="text-muted">Student Fee</label>
+									<?php }else{ ?>
+									<label class="text-muted">Student Fee (as per class policy)</label>
+									<?php } ?>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Student Fee Package" ng-model="student.fee">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Admission Voucher</label>
+									<select class="form-control select" ng-model="student.create_voucher" data-fouc>
+									<option value="">Choose an option</option>
+									<option value="0">Do not create admission voucer</option>
+									<option value="1">Create admission voucher</option>
+									</select>
+								</div>
+								<?php if($this->CAMPUSSETTINGS[$this->campus_setting_m->_STD_FEE_TYPE]!=$this->student_m->FEE_TYPE_MONTHLY && $this->IS_COLLEGE){ ?>
+								<div class="col-sm-3">
+									<label class="text-muted">Create Fee Voucher?</label>
+									<select class="form-control select" ng-model="student.create_fee" data-fouc>
+									<option value="">Choose an option</option>
+									<option value="0">Create Fee Voucher Later</option>
+									<option value="1">Create Fee Voucher Now</option>
+									</select>
+								</div>
+								<div class="col-sm-3" ng-show="student.create_fee>0">
+									<label class="text-muted">Create Installments?</label>
+									<select class="form-control select" ng-model="student.is_installments" data-fouc>
+									<option value="">Choose an option</option>
+									<option value="0">Do not create installments</option>
+									<option value="1">Create installments</option>
+									</select>
+								</div>
+								<?php } ?>
+
+							</div>
+						</div>
+
+						
+						<div class="form-group" ng-show="student.create_voucher>0">
+							<div class="row">
+								<div class="col-sm-3">
+									<label class="text-muted">Admission Fee</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Admission Fee" ng-model="student.admission_fee">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Security Fee</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Security Fee" ng-model="student.security_fee">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Prospectus Fee</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Prospectus Fee" ng-model="student.prospectus">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Annual Funds</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Annual Funds" ng-model="student.annual_fund">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group" ng-show="student.is_installments>0 && student.create_fee>0">
+							<div class="row">
+								<div class="col-sm-2">
+									<label class="text-muted">First Installment</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Amount" ng-model="student.first_installment" ng-keyup="calculateInstallment()">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<label class="text-muted">Number Of installments</label>
+									<select class="form-control select" ng-model="student.installments" ng-change="calculateInstallment()" data-fouc>
+									<option value="">Choose an option</option>
+									<option value="2">2 installments</option>
+									<option value="3">3 installments</option>
+									<option value="4">4 installments</option>
+									<option value="5">5 installments</option>
+									<option value="6">6 installments</option>
+									</select>
+								</div>
+								<div class="col-sm-2">
+									<label class="text-muted">Installment Frequency</label>
+									<select class="form-control select" ng-model="student.frequency" data-fouc>
+									<option value="">Choose an option</option>
+									<option value="1">Every month</option>
+									<option value="2">Every 2 month</option>
+									<option value="3">Every 3 month</option>
+									<option value="4">Every 4 month</option>
+									</select>
+								</div>
+								<div class="col-sm-3" ng-show="student.installment>0">
+									<label class="text-muted">Installment (WOFP)</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Installment Amount" value="{{student.installment | number : 2}}" disabled="disabled">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3" ng-show="student.pkg_installment>0">
+									<label class="text-muted">Installment (WFP)</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Installment Amount" value="{{student.pkg_installment | number : 2}}" disabled="disabled">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group" ng-show="student.create_fee>0">
+							<div class="row">
+								<div class="col-sm-2">
+									<label class="text-muted">Last Exam Total Marks</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Total Marks" ng-model="student.pkg_total_marks" ng-keyup="calculateInstallment()">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-clipboard6"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<label class="text-muted">Last Exam Obt Marks</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Obtained Marks" ng-model="student.pkg_obt_marks" ng-keyup="calculateInstallment()">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-clipboard4"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<label class="text-muted">Voucher Due Date</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md datepicker" placeholder="Due Date" ng-model="student.due_date">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-calendar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3" ng-show="classFeePackage.policy.name.length>0">
+									<label class="text-muted">Fee Package</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Last Exam Total Marks" ng-model="classFeePackage.policy.name" disabled="disabled">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-list"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3" ng-show="student.is_installments>0">
+									<label class="text-muted">Package policy mode</label>
+									<select class="form-control select" ng-model="student.force_inspkg" data-fouc>
+									<option value="">Choose an option</option>
+									<option value="0">Do not apply on installments</option>
+									<option value="1">Apply also on installments</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">Other Details</h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+						
+					<div class="card-body <?php print $card_bg;?> collapse">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-3">
+									<label class="text-muted">Date Of Birth </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md datepicker" placeholder="Date Of Birth" ng-model="student.date_of_birth">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-calendar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Student Mobile </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Student Mobile Number" ng-model="student.mobile">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-mobile"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Student NIC / B-Form Number </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="xxxxxxxxxxxx" ng-model="student.nic">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Religion </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Islam" ng-model="student.religion">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+								<div class="col-sm-3">
+									<label class="text-muted">Gender</label>
+									<select class="form-control select" ng-model="student.gender" data-fouc>
+									<option value="">Select Gender</option>
+									<option value="male">Male</option>
+									<option value="female">Female</option>
+									<option value="other">Other</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Blood Group</label>
+									<select class="form-control select" ng-model="student.blood_group" data-fouc>
+									<option value="">Selec Boold Group</option>
+									<option value="A+">A+</option>
+									<option value="A-">A-</option>
+									<option value="B+">B+</option>
+									<option value="B-">B-</option>
+									<option value="O+">O+</option>
+									<option value="O-">O-</option>
+									<option value="AB+">AB+</option>
+									<option value="AB-">AB-</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Emergency Contact Number </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Emergency Contact Number" ng-model="student.emergency_contact">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-phone2"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+
+								<div class="col-sm-3">
+									<label class="text-muted">Father NIC </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Father NIC" ng-model="student.father_nic">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Mother Name </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Mother Name" ng-model="student.mother_name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Mother NIC </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Mother NIC" ng-model="student.mother_nic">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+
+								<div class="col-sm-6">
+									<label class="text-muted">Father Occupation </label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="Father Occupation" ng-model="student.father_occupation"></textarea>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Home Address </label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="Home Address" ng-model="student.address"></textarea>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Medical Problem</label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="if any medical problem" ng-model="student.medical_problem"></textarea>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Any Other Information</label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="if any" ng-model="student.other_info"></textarea>
+								</div>								
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="saveRow()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Save</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /add modal -->
+
+<!-- edit modal -->
+<div id="edit" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-full">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Update Account ({{selectedRow.name}})</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you update student account here. Please change required data and click on save. Ask your administrator to create a new classes for you if target class is not available in drop down option...</p>
+				<p class="text-muted">
+					<code>Student ID</code> : {{selectedRow.student_id}}<br>
+					<code>Computer Number</code> : {{selectedRow.computer_number}}<br>
+					<code>Family Number</code> : {{selectedRow.family_number}}<br>
+				</p>
+				
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">Required Data</h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+
+						<div class="card-body <?php print $card_bg;?>">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-3">
+									<label class="text-muted">Admission Number <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Admission Number" ng-model="selectedRow.admission_no">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Student Name <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Full Name" ng-model="selectedRow.name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Guardian Name <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Guardian Name" ng-model="selectedRow.guardian_name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Guardian Mobile <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="03xxxxxxxxx" ng-model="selectedRow.guardian_mobile">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-mobile"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+								
+								<div class="col-sm-3">
+									<label class="text-muted">Session<span class="text-danger"> * </span></label>
+									<select class="form-control select" ng-model="selectedRow.session_id" data-fouc>
+									<!-- <option value="">Select Session</option> -->
+									<?php foreach ($sessions as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php if(count($std_groups)>0 && $this->IS_COLLEGE){?>
+								<div class="col-sm-2">
+									<label class="text-muted">Group</label>
+									<select class="form-control select" ng-model="selectedRow.group_id" data-fouc>
+									<option value="">Select Group</option>
+									<?php foreach ($std_groups as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php } ?>
+								<div class="col-sm-3">
+									<label class="text-muted">Student Class<span class="text-danger"> * </span></label>
+									<select class="form-control select" ng-model="selectedRow.class_id" ng-change="loadClassSections()" data-fouc>
+									<!-- <option value="">Select Class</option> -->
+									<?php foreach ($classes as $row){?>            
+									    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+								    <?php }?>
+									</select>
+								</div>
+								<?php if($this->IS_COLLEGE){?>
+									<div class="col-sm-3">
+										<label class="text-muted">Fee Type</label>
+										<select class="form-control select" ng-model="selectedRow.fee_type" data-fouc>
+										<option value="<?php print $this->student_m->FEE_TYPE_MONTHLY ?>">Student will Pay Fee Monthly</option>
+										<option value="<?php print $this->student_m->FEE_TYPE_FIXED ?>">Student will pay pre-fixed fee for a session</option>
+										</select>
+									</div>
+								<?php } ?>
+								<div class="col-sm-3">
+									<label class="text-muted">Student Fee</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Student Fee" ng-model="selectedRow.fee">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-3">
+									<label class="text-muted">Computer Number</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Family Number" ng-model="selectedRow.computer_number">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-laptop"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Family Number</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Family Number" ng-model="selectedRow.family_number">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-people"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">Other Details</h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+						
+					<div class="card-body <?php print $card_bg;?>">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-3">
+									<label class="text-muted">Date Of Birth </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md datepicker" placeholder="Date Of Birth" ng-model="selectedRow.date_of_birth">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-calendar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Student Mobile </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Student Mobile Number" ng-model="selectedRow.mobile">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-mobile"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Student NIC / B-Form Number </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="xxxxxxxxxxxx" ng-model="selectedRow.nic">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Religion </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Islam" ng-model="selectedRow.religion">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+								<div class="col-sm-3">
+									<label class="text-muted">Gender</label>
+									<select class="form-control select" ng-model="selectedRow.gender" data-fouc>
+									<!-- <option value="">Select Gender</option> -->
+									<option value="male">Male</option>
+									<option value="female">Female</option>
+									<option value="other">Other</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Blood Group</label>
+									<select class="form-control select" ng-model="selectedRow.blood_group" data-fouc>
+									<!-- <option value="">Selec Boold Group</option> -->
+									<option value="A+">A+</option>
+									<option value="A-">A-</option>
+									<option value="B+">B+</option>
+									<option value="B-">B-</option>
+									<option value="O+">O+</option>
+									<option value="O-">O-</option>
+									<option value="AB+">AB+</option>
+									<option value="AB-">AB-</option>
+									</select>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Emergency Contact Number </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Emergency Contact Number" ng-model="selectedRow.emergency_contact">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-phone2"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Registration Date</label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md datepicker" placeholder="Date Of Birth" ng-model="selectedRow.date">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-calendar"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+
+								<div class="col-sm-3">
+									<label class="text-muted">Father Name </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Father Name" ng-model="selectedRow.father_name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Father NIC </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Father NIC" ng-model="selectedRow.father_nic">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Mother Name </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Mother Name" ng-model="selectedRow.mother_name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-user"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-3">
+									<label class="text-muted">Mother NIC </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Mother NIC" ng-model="selectedRow.mother_nic">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+
+
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="row">
+
+
+								<div class="col-sm-6">
+									<label class="text-muted">Father Occupation </label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="Father Occupation" ng-model="selectedRow.father_occupation"></textarea>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Home Address </label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="Home Address" ng-model="selectedRow.address"></textarea>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Medical Problem</label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="if any medical problem" ng-model="selectedRow.medical_problem"></textarea>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Any Other Information</label>
+									<textarea rows="2" cols="3" class="form-control" placeholder="if any" ng-model="selectedRow.other_info"></textarea>
+								</div>								
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="updateRow()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Save</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /edit modal -->
+
+
+<!-- change password modal -->
+<div id="password" class="modal fade" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Update Account Password ({{selectedRow.name}})</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let the student login into their portal. You may reset the password for student portal if they forget the current password...</p>
+				
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">Portal Registration </h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+
+						<div class="card-body <?php print $card_bg;?>">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-10">
+									<label class="text-muted">New Passsword for student id({{selectedRow.student_id}})<span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Enter New Password here" ng-model="staff.password">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-key"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="changePassword()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Save</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /edit modal -->
+
+
+<!-- fee voucher modal -->
+<div id="fee" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Create Fee Voucher For ({{selectedRow.name}})</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you create fee voucher for indivisual students. Please provide required data to create fee voucher...</p>
+				
+
+				<div class="card <?php print $card_border;?>">
+					<div class="card-header <?php print $card_heading_bg;?> text-white header-elements-inline">
+						<h6 class="card-title">Required Data</h6>
+						<div class="header-elements">
+							<div class="list-icons">
+		                		<a class="list-icons-item" data-action="collapse"></a>
+		                	</div>
+	                	</div>
+					</div>
+
+						<div class="card-body <?php print $card_bg;?>">
+						<div class="form-group">
+							<div class="row">
+								<div class="col-sm-6">
+									<label class="text-muted">Name <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Voucher Name/Title" ng-model="entry.name">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Record Title <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Record Title" ng-model="entry.title">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-vcard"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Amount <span class="text-danger"> * </span></label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md" placeholder="Total fee amount" ng-model="entry.amount">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-coin-dollar"></i>
+										</div>
+									</div>
+								</div>
+								<div class="col-sm-6">
+									<label class="text-muted">Due Date </label>
+									<div class="form-group form-group-feedback form-group-feedback-left">
+										<input type="text" class="form-control form-control-md datepicker" placeholder="Due Date" ng-model="entry.due_date">
+										<div class="form-control-feedback form-control-feedback-md">
+											<i class="icon-calendar"></i>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="createFeeRow()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Create Fee Voucher</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /fee voucher modal -->
+
+
+
+<!-- all staff sms -->
+<div id="list-sms" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-full">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Send SMS Notification To Student List</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you send sms notitification to all students after applying below filter. You need to enable sms notification feature from settings before sending the sms notification. <?php print $this->SMS_HOST_NOTE; ?></p>
+
+				<legend class="font-weight-semibold text-uppercase font-size-sm"><i class="icon-filter3 mr-2"></i>Choose Student Filters</legend>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-sm-2">
+							<label class="text-muted">Target</label>
+							<select class="form-control select" ng-model="filter.target" data-fouc>
+							<option value="">Student Mobile</option>
+							<option value="grd">Guardian Mobile</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Class</label>
+							<select class="form-control select" ng-model="filter.class" data-fouc>
+							<option value="">Select Class</option>
+							<?php foreach ($classes as $row){?>            
+							    <option value="<?=$row['mid'];?>" /><?php print strtoupper($row['title']);?>
+						    <?php }?>						    
+							    <option value="alumni" />Alumni Students
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Status</label>
+							<select class="form-control select" ng-model="filter.status" data-fouc>
+							<option value="">Select Status</option>
+							<option value="<?php print $this->student_m->STATUS_ACTIVE;?>" /><?php print strtoupper($this->student_m->STATUS_ACTIVE);?>
+							<option value="<?php print $this->student_m->STATUS_UNACTIVE;?>" /><?php print strtoupper($this->student_m->STATUS_UNACTIVE);?>
+							<option value="<?php print $this->student_m->STATUS_EXPELLED;?>" /><?php print strtoupper($this->student_m->STATUS_EXPELLED);?>
+							<option value="<?php print $this->student_m->STATUS_LEFT;?>" /><?php print strtoupper($this->student_m->STATUS_LEFT);?>
+							<option value="<?php print $this->student_m->STATUS_PASSOUT;?>" /><?php print strtoupper($this->student_m->STATUS_PASSOUT);?>
+							<option value="<?php print $this->student_m->STATUS_TRANSFER;?>" /><?php print strtoupper($this->student_m->STATUS_TRANSFER);?>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Minimum Fee</label>
+							<select class="form-control select" ng-model="filter.fee" data-fouc>
+								<option value="">Select Minimum Fee</option>
+								<option value="100">100</option>
+								<option value="500">500</option>
+								<option value="1000">1000</option>
+								<option value="5000">5000</option>
+								<option value="10000">10000</option>
+								<option value="50000">50000</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Gender</label>
+							<select class="form-control select" ng-model="filter.gender" data-fouc>
+							<option value="">Select Gender</option>
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+							<option value="other">Other</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<label class="text-muted">Blood Group</label>
+							<select class="form-control select" ng-model="filter.blood_group" data-fouc>
+							<option value="">Selec Boold Group</option>
+							<option value="A+">A+</option>
+							<option value="A-">A-</option>
+							<option value="B+">B+</option>
+							<option value="B-">B-</option>
+							<option value="O+">O+</option>
+							<option value="O-">O-</option>
+							<option value="AB+">AB+</option>
+							<option value="AB-">AB-</option>
+							</select>
+						</div>
+
+						
+					</div>
+				</div>
+
+				<legend class="font-weight-semibold text-uppercase font-size-sm"><i class="icon-envelop mr-2"></i>Write Message...</legend>
+				<p>
+					<button type="button" class="btn btn-outline-success btn-sm" ng-click="addkey('NAME')"><i class="icon-user mr-2"></i> Student Name</button>
+					<button type="button" class="btn btn-outline-info btn-sm" ng-click="addkey('GUARDIAN')"><i class="icon-people mr-2"></i> Guardian</button>
+				</p>
+				<div class="form-group">
+					<label class="text-muted">Dynamic keys will be changed into actual values before sending sms.</label>
+					<div class="row">
+						<div class="col-sm-10">
+							<textarea class="form-control" ng-model="message" placeholder="Write your message..." rows="5"></textarea>
+						</div>
+					</div>
+				</div>
+				<br>
+				<p class="text-muted">Sms notification will be sent to filtered students only. Incase you do not choose any filter then sms notificaton will be delivered to all registered students of this campus...</p>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="sendListSms()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Send SMS</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /all staff sms -->
+
+
+<!-- single staff sms -->
+<div id="sms" class="modal fade" tabindex="-1">
+	<div class="modal-dialog modal-full">
+		<div class="modal-content">
+			<div class="modal-header bg-success">
+				<h6 class="modal-title">Send SMS Notification To {{selectedRow.name}}</h6>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+
+			<div class="modal-body">
+
+				<p class="text-muted">EMS let you send sms notitification to all students after applying below filter. You need to enable sms notification feature from settings before sending the sms notification. <?php print $this->SMS_HOST_NOTE; ?></p>
+
+				<legend class="font-weight-semibold text-uppercase font-size-sm"><i class="icon-filter3 mr-2"></i>Choose Student Filters</legend>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-sm-2">
+							<label class="text-muted">Target</label>
+							<select class="form-control select" ng-model="filter.target" data-fouc>
+							<option value="">Student Mobile</option>
+							<option value="grd">Guardian Mobile</option>
+							</select>
+						</div>						
+					</div>
+				</div>
+
+				<legend class="font-weight-semibold text-uppercase font-size-sm"><i class="icon-envelop mr-2"></i>Write Message...</legend>
+				<p>
+					<button type="button" class="btn btn-outline-success btn-sm" ng-click="addkey('NAME')"><i class="icon-user mr-2"></i> Student Name</button>
+					<button type="button" class="btn btn-outline-info btn-sm" ng-click="addkey('GUARDIAN')"><i class="icon-people mr-2"></i> Guardian</button>
+				</p>
+				<div class="form-group">
+					<label class="text-muted">Dynamic keys will be changed into actual values before sending sms.</label>
+					<div class="row">
+						<div class="col-sm-10">
+							<textarea class="form-control" ng-model="message" placeholder="Write your message..." rows="5"></textarea>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-link" data-dismiss="modal">Close</button>
+				<button ng-click="sendSingleSms()" class="btn btn-success btn-lg">
+					<span class="font-weight-bold"> Send SMS</span> <i ng-class="{'icon-spinner2':appConfig.btnClickedSave, 'spinner':appConfig.btnClickedSave, 'icon-circle-right2':!appConfig.btnClickedSave}" class=" ml-2"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /single staff sms -->
+
+
+
+
+
+</div>
+<!-- /main content -->
+<!-- ********************************************************************** -->
+<!-- ///////////////////////////////SCRIPTS//////////////////////////////// -->
+<!-- ********************************************************************** -->
+<!-- <script type="text/javascript">
+	
+$(function(){
+   
+});
+</script> -->

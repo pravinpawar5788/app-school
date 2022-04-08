@@ -1,0 +1,11 @@
+.brand-name{
+    color:#fff;
+    font-size: 12px;
+    font-weight: bolder;
+}
+.brand-version{
+    color:#fff;
+    font-size: 8px;
+    font-weight: bolder;
+    margin: 4px;
+}
