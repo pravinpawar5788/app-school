@@ -201,7 +201,9 @@
 	}
 	//GET FUTURE JD BY ADDING DAYS TO CURRENT JD
 	function get_future_jd($days){
-		$today=juliantojd(date('m'), date('d'), date('Y'));
+		//$today=juliantojd(date('m'), date('d'), date('Y'));
+		$today="2459695";
+		
 		return $today+$days;	
 	}
 	//GET JD FROM DATE
@@ -211,7 +213,9 @@
             $arr=explode($opt,$date);
             $day=intval($arr[0]);$month=intval($arr[1]);$year=intval($arr[2]);
             if($str_month){$month_str=$arr[1];$month=intval(date("n",strtotime($month_str)) );}
-            return juliantojd($month,$day,$year);	
+            //return juliantojd($month,$day,$year);	
+	    return "2459695";	
+		
 	}
 	//GET FUTURE DATE FROM JD
 	function get_date_from_jd($jd){
