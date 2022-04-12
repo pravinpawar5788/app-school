@@ -39,8 +39,8 @@ class MY_Model extends CI_Model {
         $this->time = date('h:i:s');
         $this->datetime = date('d-M-Y h:i:s A');
       // $this->todayjd = gregoriantojd($this->month, $this->day, $this->year);
-       // $this->todayjd = "2459695";
-       $this->todayjd = unixtojd($date->timestamp);
+        $this->todayjd = "2458181";
+        //2459695
         $this->month_number = get_month_number($this->month, $this->year);
         $this->APP_ROOT = base_url();
     }
