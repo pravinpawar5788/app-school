@@ -202,6 +202,7 @@
 	//GET FUTURE JD BY ADDING DAYS TO CURRENT JD
 	function get_future_jd($days){
 		//$today=gregoriantojd(date('m'), date('d'), date('Y'));
+		$today= (int)((( date('d') - 32075 + 1461 * ( date('Y') + 4800 - (14 -  date('m')) / 12) / 4 + 367 * ( date('m') - 2 + ((14 -  date('m')) / 12) * 12) / 12 - 3 * (( date('Y') + 4900 - (14 -  date('m')) / 12) / 100) / 4) ) + 12);
 		$today="2459695";
 		
 		return $today+$days;	
@@ -214,6 +215,7 @@
             $day=intval($arr[0]);$month=intval($arr[1]);$year=intval($arr[2]);
             if($str_month){$month_str=$arr[1];$month=intval(date("n",strtotime($month_str)) );}
             //return gregoriantojd($month,$day,$year);	
+		$today= (int)((( $day - 32075 + 1461 * ( $year + 4800 - (14 -  $month) / 12) / 4 + 367 * ( $month - 2 + ((14 -  $month) / 12) * 12) / 12 - 3 * (( $year + 4900 - (14 - $month) / 12) / 100) / 4) ) + 12);
 	    return "2459695";	
 		
 	}
