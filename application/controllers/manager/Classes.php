@@ -250,7 +250,7 @@ class Classes extends Manager_Controller{
         // get input fields into array       
         $this->RESPONSE['error']=FALSE;
         $form=$this->input->safe_post();
-        ENVIRONMENT !== 'production' ? $this->RESPONSE['request']=$form: '';
+        //ENVIRONMENT !== 'production' ? $this->RESPONSE['request']=$form: '';
         //check for necessary required data   
         $required=array('title','incharge_id');
         foreach ($required as $key) {
